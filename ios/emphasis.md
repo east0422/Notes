@@ -16,16 +16,77 @@
 	* 栈帧是指为一个函数调用单独分配的那部分栈空间。比如，当运行中的程序调用另一个函数时，就要进入一个新的栈帧，原来函数的栈帧称为调用者的帧，新的栈帧称为当前帧。被调用的函数运行结束后当前帧全部收缩，回到调用者的帧。每个帧都是基于一个函数，帧随着函数的生命周期产生、发展和消亡。  
 
 ---
-### objc_msgSend
-####	1. 需先将build setting中objc_msgSend值YES改为NO。
-#### 2. 如果调用有参数的方法，需要先定义原型再使用，否则会发生崩溃。
-    Person *p = [[Person alloc] init];
-    void (*eat_msgsend)(id, SEL, NSString *) = (void (*)(id, SEL, NSString *))objc_msgSend;
-    eat_msgsend(p, @selector(eatWithObject:), @"apple");
+### 运行时runtime
+#### objc_msgSend
+###### 1. 需先将build setting中objc_msgSend值YES改为NO。
+###### 2. 如果调用有参数的方法，需要先定义原型再使用，否则会发生崩溃。
+```
+Person *p = [[Person alloc] init];
+void (*eat_msgsend)(id, SEL, NSString *) = (void (*)(id, SEL, NSString *))objc_msgSend;
+eat_msgsend(p, @selector(eatWithObject:), @"apple");
 	
-	在mac下可新建测试文件main.m和Person类然后使用clang -rewrite-objc main.m获取main.cpp查看其底层
-    Person *p = [[Person alloc] init];在底层实现实质如下：
-    Person *(*person_msgSend)(id, SEL) = (Person *(*)(id, SEL))(void *)objc_msgSend;
-    Person *p2 = person_msgSend((id)person_msgSend((id)objc_getClass("Person"), sel_registerName("alloc")), sel_registerName("init"));
+// 在mac下可新建测试文件main.m和Person类然后使用clang -rewrite-objc main.m获取main.cpp查看其底层
+Person *p = [[Person alloc] init];在底层实现实质如下：
+Person *(*person_msgSend)(id, SEL) = (Person *(*)(id, SEL))(void *)objc_msgSend;
+Person *p2 = person_msgSend((id)person_msgSend((id)objc_getClass("Person"), sel_registerName("alloc")), sel_registerName("init"));
+```
+[可参考代码https://github.com/east0422/Training/blob/feature/oc/othersdemo/oc/OthersDemo/OthersDemo/runtime/Person/PersonViewController.m](https://github.com/east0422/Training/blob/feature/oc/othersdemo/oc/OthersDemo/OthersDemo/runtime/Person/PersonViewController.m)  
 
+#### method_exchangeImplementations 
+###### 1. 需要在使用之前先调用，通常会放在load方法中
+```
++ (void)load {  
+	// class_getClassMethod是类方法，class_getInstanceMethod是对象方法
+	Method originMethod = class_getClassMethod(self, @selector(URLWithString:));
+	Method replacedMethod = class_getClassMethod(self, @selector(Verify_URLWithString:));
+    // 交换两个方法实现
+    method_exchangeImplementations(originMethod, replacedMethod);
+}  
+```
+###### 2. 在替代方法中不要调用原方法而需要调用自己否则的话会不断调用直到内存溢出，因为此时两个方法实现已经交换。
+```
++ (instancetype)Verify_URLWithString:(NSString *)URLString {
+    // 注意：如果使用[NSURL URLWithString:URLString];会一直调用直到内存溢出
+    NSURL *url = [NSURL Verify_URLWithString:URLString];
+    if (url == nil) {
+        printf("url 为 nil\n");
+    }
+    return url;
+}
+```
+###### 3. NSURL中若有中文需对其编码否则会为null
+```
+NSString *urlString = [@"http://www.baidu.com/中文测试" stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLQueryAllowedCharacterSet]];
+```
+[可参考代码https://github.com/east0422/Training/blob/feature/oc/othersdemo/oc/OthersDemo/OthersDemo/runtime/NSURLVerify/NSURLVerifyViewController.m](https://github.com/east0422/Training/blob/feature/oc/othersdemo/oc/OthersDemo/OthersDemo/runtime/NSURLVerify/NSURLVerifyViewController.m) 
+
+---  
+
+### KVO  
+
+```
+// Animal.h
+@interface Animal : NSObject {
+    @public
+    NSInteger age; // 成员变量
+}
+// 这句话相当于定义成员变量_name并实现setter和getter方法
+@property (nonatomic, copy) NSString *name;
+
+@end
+
+// AnimalViewController.m
+_animal = [[Animal alloc] init];
+// 1. 动态创建Animal子类。 2. 改变_animal对象类型为其子类型NSKVONotifying_Animal。 3. 使用子类型。
+// 查看的话在此加个断点，第一次到这里的时候Command + Q停止当前任务，再重新打开再调试就可看到_animal的isa的改变
+[_animal addObserver:self forKeyPath:@"name" options:(NSKeyValueObservingOptionNew) context:nil];
+// 由@property (nonatomic, copy) NSString *name;
+_animal.name = @"小花猫";
+// 成员变量使用->
+_animal->age = 2;
+```
+![images/Animal.png](images/Animal.png "原始类型Animal")
+![images/NSKVONotifying_Animal.png](images/NSKVONotifying_Animal.png "子类型NSKVONotifying_Animal")
+
+[可参考代码https://github.com/east0422/Training/blob/feature/oc/othersdemo/oc/OthersDemo/OthersDemo/kvo/Animal/AnimalViewController.m](https://github.com/east0422/Training/blob/feature/oc/othersdemo/oc/OthersDemo/OthersDemo/kvo/Animal/AnimalViewController.m)
 
