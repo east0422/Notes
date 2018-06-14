@@ -84,9 +84,11 @@ _animal = [[Animal alloc] init];
 _animal.name = @"小花猫";
 // 成员变量使用->
 _animal->age = 2;
-```
-![images/Animal.png](images/Animal.png "原始类型Animal")
-![images/NSKVONotifying_Animal.png](images/NSKVONotifying_Animal.png "子类型NSKVONotifying_Animal")
+```  
+原始类型Animal:  
+![images/ios_Animal.png](../images/ios_Animal.png "原始类型Animal")  
+子类型NSKVONotifying_Animal:  
+![images/ios_NSKVONotifying_Animal.png](../images/ios_NSKVONotifying_Animal.png "子类型NSKVONotifying_Animal")
 
 [可参考代码https://github.com/east0422/Training/blob/feature/oc/othersdemo/oc/OthersDemo/OthersDemo/kvo/Animal/AnimalViewController.m](https://github.com/east0422/Training/blob/feature/oc/othersdemo/oc/OthersDemo/OthersDemo/kvo/Animal/AnimalViewController.m)
 
