@@ -1,2 +1,4 @@
-# interviews
-collect the interview that i think is interesting, difficult or easy to ignore
+# notes
+	collect the notes that is interesting, difficult and easy to ignore。
+
+
