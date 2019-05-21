@@ -5,6 +5,10 @@
 		==`defaults write com.apple.finder AppleShowAllFiles -bool true`==
 2. 终端隐藏隐藏文件:    ==`defaults write com.apple.finder AppleShowAllFiles -bool false`==
 3. 输入指令后一定要重新启动Finder，快捷键==Command+Option+ESC==调出重启窗口选择Finder重新启动
+
+## mac终端swift
+1. swift/xcrun swift。
+2. NSString是一个类，在Foundation中，String是结构体。
   
 ## 常用终端命令
 1. 拷贝文件: ==cp 参数(R对目录进行递归操作) 源文件 目标文件==
