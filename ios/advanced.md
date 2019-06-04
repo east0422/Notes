@@ -1,5 +1,5 @@
 ## 常用控件
-### UIWindow
+#### UIWindow
 1. 是一种特殊的UIView，也是UIView的子类，通常在一个app中只会有一个UIWindow。
 2. iOS程序启动完毕后，创建的第一个视图控件就是UIWindow，接着创建控制器的view，最后将控制器的view添加到UIWindow上，于是控制器的view就显示在屏幕上了。
 3. 添加UIView到UIWindow的两种常见方式：
@@ -10,50 +10,67 @@
   *  -(void)makeKeyAndVisible;让当前UIWindow变成keyWindow并显示出来。
 5. 获取某个UIView所在的UIWindow: view.window。
 6. 注意: 3.第一种方式是不能让控制器的view进行旋转，3.第二种方式控制器的view可以旋转，因为旋转事件传递是由UIApplication->UIWindow(窗口不做旋转处理，只有控制器才会做旋转处理)->UIViewController控制器的。
+7. 作用：
+	* 作为容器，包含app所要显示的所有视图。
+	* 传递触摸消息到程序中view和其它对象。
+	* 与UIViewController协同工作，方便完成设备方向旋转的支持。
 
-### 状态栏设置样式
+#### 状态栏设置样式
 1. 由控制器方法 -(UIStatusBarStyle)preferredStatusBarStyle决定。
 2. 使用application设置application.statusBarStyle = UIStatusBarStyleLightContent;
 3. 注意：2第二种方式默认不起作用，因为状态栏样式默认由控制器来管理，如果想用application设置状态栏则需在Info.plist中设置View controller-based status bar appearance = NO）。
 
-### 导航栏
+#### 导航栏
 1. 局部配置： 获取导航控制器的navigationBar属性self.navigationBar。
 2. 全局配置：通过[UINavigationBar appearance]获取的导航条对象可以设置应用的”所有导航条”的样式。
 
-### 更改NavItem样式
+#### 更改NavItem样式
 1. 获取NavItem: UIBarButtonItem *navItem = [UIBarButtonItem appearance];
 2. 更改样式
   * 改变整个按钮背景 [navItem setBackButtonBackgroundImage: [UIImage  imageNamed:@“NavBackButton"] forState:UIControlStateNormal barMetrics:UIBarMetricsDefault]; 
   * 设置Item的字体大小
  [navItem setTitleTextAttributes:@{NSFontAttributeName:[UIFont systemFontOfSize:18]}forState:UIControlStateNormal];
  
-### UIViewController
-* 每当显示一个新界面时，首先会创建一个新的UIViewController对象，然后创建一个对应的全局UIView，UIViewController负责管理这个UIView。
-* UIViewController就是UIView的大管家，负责创建、显示、销毁UIView，负责监听   UIView内部的事件，负责处理UIView与用户的交互。
-* UIViewController内部有个UIView属性，它负责管理UIView对象:  @property(nonatomic, retain) UIView *view。
+#### UIViewController
+1. 每当显示一个新界面时，首先会创建一个新的UIViewController对象，然后创建一个对应的全局UIView，UIViewController负责管理这个UIView。
+2. UIViewController就是UIView的大管家，负责创建、显示、销毁UIView，负责监听   UIView内部的事件，负责处理UIView与用户的交互。
+3. UIViewController内部有个UIView属性，它负责管理UIView对象:  @property(nonatomic, retain) UIView *view。
+ 
+####  视图控制器的生命周期
+1. loadView，尽管不直接调用该方法(eg，多手动创建自己的视图)，那么应该覆盖这个方法并将它们赋值给视图控制器的view属性。
+2. viewDidLoad，只有在视图控制器将其视图载入到内存之后才调用该方法，这是执行任何其他初始化操作的入口。
+3. viewWillAppear，当视图将要添加到窗口中并且还不可见的时候或者上层视图移出图层后本视图变成顶级视图时调用该方法，用于执行诸如改变视图方向等的操作。实现该方法时确保调用[super viewWillAppear:]。
+4. viewDidAppear，当视图添加到窗口中以后或上层视图移出图层后本视图变成顶级视图时调用，用于放置那些需要在视图显示后执行的代码。确保调用[super viewDidAppear:]。
+5. viewWillDisappear，控制器对象的视图即将消失，被覆盖或隐藏时调用。
+6. viewDidDisappear，控制器对象的视图已经消失、被覆盖或隐藏时调用。
 
-### 视图控制器UIViewController的创建方式
+#### 视图控制器UIViewController的创建方式
 1. UIStoryboard
-
- 	1.1. 获取storyboard：UIStoryboard *storyboard = [UIStoryboard storyboardWithName:name bundle:nil];。
-  1.2. 依据storyboard创建视图控制器：
-    * [storyboard instantiateInitialViewController]获取箭头所指的视图控制器。
-    * [storyboard instantiateViewControllerWithIdentifier:ID]获取标识ID所指视图控制器。
+ 	1. 获取storyboard：UIStoryboard *storyboard = [UIStoryboard storyboardWithName:name bundle:nil];。
+ 	2. 依据storyboard创建视图控制器：
+		* [storyboard instantiateInitialViewController]获取箭头所指的视图控制器。
+    	* [storyboard instantiateViewControllerWithIdentifier:ID]获取标识ID所指视图控制器。
 2. xib： [[ViewControllerName alloc] initWithNibName:name bundle:nil]。
 3. 代码：[[ViewControllerName alloc] init]。
 
-### 视图UIView的创建流程
-控制器view加载顺序从高到低依次为 loadView()  > storyboard > nibName.xib > View.xib > ViewController.xib > 空白view。
+#### 视图UIView的创建
+1. 创建流程：控制器view加载顺序从高到低依次为 loadView() > storyboard > nibName.xib > View.xib > ViewController.xib > 空白view。
+2. 用系统的loadView方法创建控制器的视图。
+3. 若指定加载某个storyboard文件做控制器的视图，就会加载storyboard里面的描述去创建view。
+4. 若指定读取某个xib文件做控制器的视图，就根据指定的xib文件去加载创建。
+5. 若有xib文件名和控制器的类名前缀(也就是去掉controller)的名字一样的xib文件，就会用这个xib文件来创建控制器的视图(eg,控制器名为AAViewController xib文件名为AAView.xib)。
+6. 找和控制器同名的xib文件去创建。
+7. 如果以上都没有就创建一个空的控制器的视图。
 
-### UIScrollView
-不能滚动常见原因：
-* 没有设置contentSize(滚动范围)
-* 禁用滚动scrollEnabled = NO或禁用了用户交互userInteractionEnabled = NO
-* 没有取消autolayout功能(要想scrollView滚动，必须取消autolayout)
+#### UIScrollView
+1. 不能滚动常见原因：
+	* 没有设置contentSize(滚动范围)
+	* 禁用滚动scrollEnabled = NO或禁用了用户交互userInteractionEnabled = NO
+	* 没有取消autolayout功能(要想scrollView滚动，必须取消autolayout)
 
-### UIButton
+#### UIButton
 默认image在左，title在右，若想重新排列image和title布局样式，只需自定义一个CusUIButton继承UIButton，然后实现titleRectForContentRect和imageRectForContentRect在其中重新布局即可。 
-### UIImage两种加载方式(内存优化)
+#### UIImage两种加载方式(内存优化)
 1. `+ (UIImage *) imageNamed:(NSString *)name;` // name是图片文件名
 	* 加载到内存以后，会一直停留在内存中，不会随着对象销毁而销毁，有缓存。
 	* 加载图片到内存以后，占用的内存归系统管理，程序员无法管理。
@@ -66,16 +83,36 @@
 3. 放在xcassets里面的图片只能通过imageNamed方法加载，图片放在非cassettes中则可以通过[[NSBundle mainBundle] pathForResource: imageName ofType: imageType];获取对应图片路径后再使用上述2加载图片。
 4. 可将多张图片放入一个数组赋值给UIImageView的animationImages属性然后调用startAnimating开始动画播放，不过需要注意的是在动画播放完成后记得将animationImages置为nil避免长期占用内存资源[self.imageView performSelector:@selector(setAnimationImages:) withObject:nil after:self.imageView.animationDuration+0.1]。
 
-### storyboard
-IBAction
-* 从返回值角度上看，作用相当于void。
-* 只有返回值声明为IBAction的方法，才能跟storyboard中的控件进行连线。
-IBOutlet
-* 只有声明为IBOutlet的属性，才能跟storyboard中的控件进行连线。
+#### storyboard
+1. IBAction
+	* 从返回值角度上看，作用相当于void。
+	* 只有返回值声明为IBAction的方法，才能跟storyboard中的控件进行连线。
+2. IBOutlet
+	* 只有声明为IBOutlet的属性，才能跟storyboard中的控件进行连线。
+
+#### layoutSubViews和drawRects
+1. layoutSubViews在以下情况下会被调用(视图位置变化是触发)：
+	* init初始化不会触发layoutSubviews。
+	* addSubview会触发layoutSubviews。
+	* 设置view的Frame会触发layoutSubviews，当然前提是frame的值设置前后发生了变化。
+	* 滚动一个UIScrollView会触发layoutSubviews。
+	* 旋转Screen会触发父UIView上的layoutSubviews事件。
+	* 改变一个UIView大小的时候也会触发父UIView上的layoutSubviews事件。
+	* 直接调用setLayoutSubviews。
+2. drawRect在以下情况下会被调用：
+	* 如果在UIView初始化时没有设置rect大小，将直接导致drawRect不被自动调用。drawRect调用是在Controller->loadView，Controller->viewDidLoad两方法之后调用的，所以不用担心在控制器中这些View的drawRect就开始画了，这样可以在控制器中设置一些值给View（如果这些View draw的时候需要用到某些变量值）。
+	* 该方法在调用sizeToFit后被调用，所以可以先调用sizeToFit计算出size，然后系统自动调用drawRect:方法。
+	* 通过设置contentMode属性值为UIViewContentModeRedraw，那么将在每次设置或更改frame的时候自动调用drawRect：。
+	* 直接调用setNeedsDisplay，或者setNeedsDisplayInRect:触发drawRect：，但是有个前提条件是rect不能为0。
+3. 使用drawRect注意点：
+	* 若使用UIView绘图，只能在drawRect：方法中获取相应的contextRef并绘图。如果在其他方法中获取将获取到一个invalidate的ref并且不能用于画图。drawRect:方法不能手动显示调用，必须通过调用setNeedsDisplay或者setNeedsDisplayInRect，让系统自动调用该方法。
+	* 若使用CAlayer绘图，只能在drawInContext：中绘制，或者在delegate中的相应方法绘制。同样也是调用setNeedDisplay等间接调用以上方法。
+	* 若要实时画图，不能使用gestureRecognizer，只能使用touchBegan等方法来调用setNeedsDisplay实时刷新屏幕。
+
 
 
 ## 框架
-### NSTimer
+#### NSTimer
 1. 启动定时器的两种方法
   * 
 ```timerWithTimeInterval需要手动将timer加入到消息循环中：     NSTimer *timer = [NSTimer timerWithTimeInterval:2.0 target:self selector:       @selector(nextImage) userInfo:nil repeats:YES]; 
@@ -87,7 +124,7 @@ IBOutlet
 ```
   * 注意：如果当前线程run loop处UIEventTrackingRunLoopMode模式会不处理定时器事件。 
 
-### NSRunLoop
+#### NSRunLoop
 	在Cocoa中，每个线程对象中内部都有一个run loop(NSRunLoop)对象用来循环处理输入事件(来自Input sources的异步事件和来自Timer sources的同步事件)。每个run loop可运行在不同的模式下，一个run loop mode是一个集合，其中包含其监听的若干输入事件源，定时器，以及在事件发生时需要通知的run loop observers。
 	Cocoa中预定义模式
  1. Default模式：NSDefaultRunLoopMode(Cocoa),KCFRunLoopDefaultMode(Core Foundation)几乎包含了所有输入源(NSConnection除外)，一般情况下应使用此模式。
@@ -97,46 +134,45 @@ IBOutlet
  5. Common模式：     NSRunLoopCommonModes(Cocoa)，kCFRunLoopCommonModes(Core Foundation)这是一个伪模式，其为一组run loop mode的集合，将输入源加入此模式意味着在Common Modes中包含的所有模式都可以处理。在Cocoa应用程序中，默认情况下Common Modes包含default，modal，event tracking。还可以使用CFRunLoopAddCommonMode方法向Common Modes中添加自定义modes。
  6. 注意：NSTimer和NSURLConnection默认运行在default mode下，当用户在拖动UITableView处于UITrackingRunLoopMode模式时，NSTimer不能fire，NSURLConnection的数据也无法处理；这种情况下可以在另外的线程中处理定时器事件，可把Timer加入到NSOperation中在另一个线程中调度。或者更改Timer运行的run loop mode，将其加入到UITrackingRunLoopMode或NSRunLoopCommonModes中。 
 
-### NSURLConnection（已被NSURLSession取代）
-* 特点：处理简单网络操作非常简单，但是处理复杂的网络操作就非常繁琐。
-* 下载过程中，没有’进度的跟进’，需要通过代理的方法来处理。
-* 存在内存的峰值，解决方法是接收一点就写入文件一点。
-* NSURLConnection的代理默认是在主线程运行的，需要将其代理移到子线程执行。`[connection setDelegateQueue:[[NSOperationQueue alloc] init]];`
-* 默认下载任务在主线程工作，为避免阻塞UI更新也需要将其移到子线程执行，子线程默认不开启运行循环还需为其开启运行循环`dispatch_async(dispatch_get_global_queue(0, 0), ^{下载操作})`
+#### NSURLConnection（已被NSURLSession取代）
+1. 特点：处理简单网络操作非常简单，但是处理复杂的网络操作就非常繁琐。
+2. 下载过程中，没有’进度的跟进’，需要通过代理的方法来处理。
+3. 存在内存的峰值，解决方法是接收一点就写入文件一点。
+4. NSURLConnection的代理默认是在主线程运行的，需要将其代理移到子线程执行。`[connection setDelegateQueue:[[NSOperationQueue alloc] init]];`
+5. 默认下载任务在主线程工作，为避免阻塞UI更新也需要将其移到子线程执行，子线程默认不开启运行循环还需为其开启运行循环`dispatch_async(dispatch_get_global_queue(0, 0), ^{下载操作})`
 
-### NSURLSession
+#### NSURLSession
 1. 是iOS7中出现的网络接口，可通过URL将数据下载到内存、文件系统，还可以将据上传到指定URL，也可以在后台完成下载上传。是线程安全的。
 2. NSURLSessionConfiguration
- 	2.1. 用于定义和配置NSURLSession对象。每一个NSURLSession对象都可以设置不同的NSURLSessionConfiguration从而满足应用内不同类型的网络请求。
-
- 	2.2. 三种类型：
-  * defaultSessionConfiguration：默认配置，使用硬盘来存储缓存数据，类似NSURLConnection的标准配置。
-  * ephemeralSessionConfiguration：临时session配置，不会将缓存、cookie等保存在本地，只会存在内存里，所以当程序退出时，所有的数据都会消失。
-  * backgroundSessionConfiguration：后台session配置，与默认配置类似，不同的是会在后台开启另一个线程来处理网络数据。
+ 	1. 用于定义和配置NSURLSession对象。每一个NSURLSession对象都可以设置不同的NSURLSessionConfiguration从而满足应用内不同类型的网络请求。
+ 	2. 三种类型：
+  		* defaultSessionConfiguration：默认配置，使用硬盘来存储缓存数据，类似NSURLConnection的标准配置。
+  		* ephemeralSessionConfiguration：临时session配置，不会将缓存、cookie等保存在本地，只会存在内存里，所以当程序退出时，所有的数据都会消失。
+  		* backgroundSessionConfiguration：后台session配置，与默认配置类似，不同的是会在后台开启另一个线程来处理网络数据。
 3. NSURLSessionTask
-	3.1. NSURLSession使用NSURLSessionTask来具体执行网络请求的任务。
-	3.2. 支持网络请求的取消、暂停和恢复，也能获取数据的读取进度。
-	3.3. 三种类型
-	* NSURLSessionDataTask：处理一般的NSData数据对象，如通过GET或POST从服务器获取JSON或XML返回等等，但不支持后台获取。
-	* NSURLSessionUploadTask：用于PUT上传文件，支持后台上传。
-	* NSURLSessionDownloadTask：用于下载文件，支持后台下载。
+	1. NSURLSession使用NSURLSessionTask来具体执行网络请求的任务。
+	2. 支持网络请求的取消、暂停和恢复，也能获取数据的读取进度。
+	3. 三种类型
+		* NSURLSessionDataTask：处理一般的NSData数据对象，如通过GET或POST从服务器获取JSON或XML返回等等，但不支持后台获取。
+		* NSURLSessionUploadTask：用于PUT上传文件，支持后台上传。
+		* NSURLSessionDownloadTask：用于下载文件，支持后台下载。
 
 
 ## 其他
-### pch文件
+#### pch文件
 1. pch文件也是一个头文件，里面的内容能被项目中的其他所有源文件共享和访问
 2. 通常在pch文件中定义一些全局的宏及放置使用频繁的文件。
 3. 在pch文件中添加下面的预处理指令，然后在项目中使用Log输出日志信息，在发布的时候会将NSLog语句移除(调试模式下才有定义DEBUG)。
 
-```
-#ifdef DEBUG
-#define Log(…) NSLog(__VA_ARGS__)
-#else
-#define Log(…)
-#endif
-```
+	```
+	#ifdef DEBUG
+	#define Log(…) NSLog(__VA_ARGS__)
+	#else
+	#define Log(…)
+	#endif
+	```
 
-### 查找最合适的控件来处理事件
+#### 查找最合适的控件来处理事件
 1. 判断自己是否能接收触摸事件(下述三种情况不接收触摸事件)
   * 不接收用户交互userInteractionEnabled = NO
   * 隐藏 hidden = YES
@@ -148,7 +184,7 @@ IBOutlet
 5. 找到最合适的控件后就调用touchesBegin/touchesMoved/touchesEnd方法
 6. 注意：UIImageView的userInteractionEnabled为NO，所以UIImageView及其子类默认是不能响应触摸事件的。
 
-### 手势识别
+#### 手势识别
 1. 敲击手势UITapGestureRecognizer
 2. 长按手势UILongPressGestureRecognizer
 3. 轻扫手势UISwipeGestureRecognizer
@@ -159,10 +195,10 @@ IBOutlet
   * 若想和捏合手势同时使用，需设置其中一个手势的代理并实现 - (BOOL)gestureRecognizer:     shouldRecognizeSimultaneouslyWithGestureRecognizer: 返回YES即可,允许跟其他手势一起发生
 6. 拖拽手势UIPanGestureRecognizer
 
-### bounds
+#### bounds
 设置当前视图左上角相对子视图新的坐标值，默认为(0,0)，若设为(50,0)则子视图在视觉上向左偏移50，即以前的原点 (0,0)变为了(50,0)。
 
-### 核心动画
+#### 核心动画
 1. 开发步骤：
   1. 初始化一个动画对象(CAAnimation)并设置一些动画相关属性(如opacity，position，transform，bounds，contents等)。
   2. 添加动画对象到层(CALayer)中，开始执行动画：调用     CALayer addAnimation:forKey。
@@ -197,32 +233,32 @@ IBOutlet
     startProgress：动画起点(在整体动画的百分比)。
     endProgress：动画终点(在整体动画的百分比)。
 
-### Block块
+#### Block块
 1. self：在block中使用self有很大风险会造成循环引用，建议使用  __weak typeof(self) weakSelf = self。
 2. 内存：` // block的内存默认在栈里面(系统自动管理)   void (^test)() = ^{}  // 若对block进行了Copy操作, block的内存会迁移到堆里面(需通过代码管理内存)。  Block_copy(test);  // 在不需要使用block的时候, 应该做1次release操作   Block_release(test);
 	  [test release];`
 
-### Reachability
+#### Reachability
 1. 监测联网状态`Reachability *reach = [Reachability     reachabilityWithHostName:@"www.baidu.com"];`
 2. 判断reach.currentReachabilityStatus值。
 3. 利用通知中心实时监听联网状态  `[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(networkStatusChanged)      name:kReachabilityChangedNotification object:nil];
   self.reachability = [Reachability reachabilityForInternetConnection];
   [self.reachability startNotifier];`
 
-### SDWebImage
+#### SDWebImage
 1. 默认缓存时长一周，SDImageCacheConfig中  static const NSInteger kDefaultCacheMaxCacheAge = 60 * 60 * 24 * 7; // 1 week 
 2. 防止url对应图片重复下载：先看icon->再看内存缓存->沙盒缓存，如果已经存在于下载队列中就不再添加到里面。
 
-### ip查询
+#### ip查询
 1. 获得本机真实ip地址：https://httpbin.org/ip, 通常是接入家庭的光猫ip地址得到的
 2. 查询ip详细信息：http://ip.taobao.com/service/getIpInfo.php?ip=171.113.94.94，查询ip对应的物理位置
 
-### 规档和解档
+#### 规档和解档
 1. 实现NSCoding协议
 2. 实现-encodeWithCoder:(NSCoder *)encoder；和  - (instancetype)initWithCoder:(NSCoder *)aDecoder;
 3. 使用NSKeyedArchiver和NSKeyedUnarchiver分别归/解档
 
-### JSON
+#### JSON
 1. 定义
   是一种轻量级的数据格式，一般用于数据交互。本质上是一个特殊格式的非NSString字符串。
 2. JSON解析
@@ -231,7 +267,7 @@ IBOutlet
     	* JSON数据 —> OC对象`+ (id)JSONObjectWithData:(NSData *)data options:(NSJSONReadingOptions)opt error:(NSError **)error`
      * OC对象 —> JSON数据`+ (NSData *)dataWithJSONObject:(id)obj options:(NSJSONWritingOptions)opt error:(NSError **)error`；
 
-### XML
+#### XML
 1. 定义：和JSON一样，也是常用的一种用于交互的数据格式。
 2. 文档声明：在XML文档的最前面，必须编写一个文档声明，用来声明XML文档的类型，如<?xml version=“1.0” encoding=“UTF-8” ?> // encoding属性说明文档的字符编码
 3. XML解析
@@ -245,7 +281,7 @@ IBOutlet
       * NSXMLParserDelegate
 		`// 当扫描到文档的开始时调用(开始解析) 		 - (void)parserDidStartDocument:(NSXMLParser *)parser;  		// 当扫描到文档的结束时调用(解析完毕) 		 - (void)parserDidEndDocument:(NSXMLParser *)parser;  		// 当扫描到元素的开始时调用(attributeDict存放着元素的属性) 		- (void)parser:(NSXMLParser *)parser didStartElement:(NSString *)elementName namespaceURI:(NSString *)namespaceURI qualifiedName:(NSString *)qName attributes:(NSDictionary *)attributeDict 		// 当扫描到元素的结束时调用 		- (void)parser:(NSXMLParser *)parser didEndElement:(NSString *)elementName namespaceURI:(NSString *)namespaceURI   qualifiedName:(NSString *)qName`
 
-### Cookie
+#### Cookie
 1. 定义：由服务器端生成，发送给客户端，客户端将Cookie的Key/value保存到某个目录下的文本文件内。如果客户端支持Cookie，下次请求同一网站时就可以将Cookie直接发送给服务器。Cookie名称和值由服务器端开发自己定义。iOS程序中默认支持Cookie，不需任何处理，若服务器返回Cookie，会自动保存在沙盒的Library/Cookies目录中。
 2. 读取Cookie内容   `// 读取所有cookie   NSArray *cookies = [[NSHTTPCookieStorage sharedHTTPCookieStorage] cookies];
    for (NSHTTPCookie *cookie in cookies) {     if ([cookie.name isEqualToString:@“userName”]) {
@@ -257,7 +293,7 @@ IBOutlet
     2. 在HTTP请求中的Cookie是明文传递的，会有安全隐患，故建议使用HTTPS。
     3. Cookie的大小限制在4KB左右，不适合存储复杂的数据信息。
 
-### HTTP协议
+#### HTTP协议
 1. 定义：Hypertext Transfer Protocol超文本传输协议，访问远程网络资源，格式是http://，通信速度很快，允许传输任意类型的数据。
 2. 请求
 	1. 请求行：包含了请求方法、请求资源路径、HTTP协议版本 (GET /aa/a.png HTTP/1.1)
@@ -268,14 +304,14 @@ IBOutlet
    2. 响应头：  包含了对服务器的描述、对返回数据的描述  Server: Apache-Coyote/1.1 // 服务器的类型  Content-Type: image/jpeg    // 放回数据的类型  Content-Length: 56811   // 返回数据的长度  Date: Mon,23 Jun 2017 12:22:43  GMT  // 响应的时间
    3. 实体内容：服务器返回给客户端的具体数据
 
-### 资源打包
+#### 资源打包
 1. 图片被放到Image.xcassets里面：
 	1. ios8及以上，打包的资源包中的图片会被放到Assets.car中，图片有被压缩。
 	2. ios8以下，打包的资源包中的图片会被放在MainBundle中，图片没有被压缩。
 2. 非Image.xcassets中：  图片会直接暴露在沙盒的资源包(MainBundle)中，不会压缩到Assets.car中。
 3. 压缩到Assets.car中的图片只能通过图片名imageNamed:来加载，直接暴露在沙盒的资源包(MainBundle)中的图片可通过全路径imageWithContentsOfFile：来加载。
 
-### 内存泄漏分析
+#### 内存泄漏分析
 1. 内存泄漏：堆里不再使用的对象，没有被销毁，依然占据着内存。简单理解就是不再使用的对象没有被释放。
 2. 内存溢出
 	1. 内存不够用了。
@@ -294,7 +330,7 @@ IBOutlet
       * Foundation对象(OC对象)：会自动管理OC对象，但不会自动管理C对象
       * CoreFoundation对象(C对象)：只要函数中包含了create\new\copy\retain等关键字, 那么这些方法产生的对象就必须在不再使用的时候调用1次CFRelease或者其他release函数
 
-### 闭源库
+#### 闭源库
 1. 定义：不公开源代码，是经过编译后的二进制文件，看不到具体实现
 2. 静态库
 	1. 存在形式：.a和.framework
@@ -306,7 +342,7 @@ IBOutlet
 	1. 检测库的类型及支持的CPU框架：`lipo -info 库名`
 	2. 合并（也可以将Build Active Architecture Only的YES改为NO）`lipo -create Debug-iphoneos/libTools.a Debug-iphonesimulator/libTools.a -output libTools.a`
 
-### UIDynamic
+#### UIDynamic
 1. 定义：是从iOS7开始引入的一种新技术，隶属于UIKit框架。可认为是一种物理引擎，能模拟和仿真现实生活中的物理现象。
 2. 使用步骤：
 	1. 创建一个物理仿真器，顺便指定仿真范围 UIDynamicAnimator *animator = [[UIDynamicAnimator alloc] initWithReferenceView:self.view];
@@ -323,7 +359,7 @@ IBOutlet
 		* UIDynamicItemBehavior: 动力元素行为。
 	3. 物理仿真器(Dynamic Animator)：让物理仿真元素执行具体的物理仿真行为。是UIDynamicAnimator类型的对象。初始化: - (instancetype)initWithReferenceView:(UIView *)view;其中view参数是一个参照视图，表示物理仿真的范围。注意：不是任何对象都能做物理仿真元素，不是任何对象都能进行物理仿真。
 
-### AutoLayout
+#### AutoLayout
 1. 定义：是一种“自动布局”技术，专门用来布局UI界面。自iOS6开始引入，自iOS7(Xcode5)开始得到较大推广。
 2. 核心：
 	1. 参照
@@ -350,7 +386,7 @@ IBOutlet
 	3. 使用VFL来创建约束数组  + (NSArray *)constraintsWithVisualFormat:(NSString *)format options:(NSLayoutFormatOptions)opts metrics:(NSDictionary *)metrics views:(NSDictionary *)views;其中format为VFL语句，opts约束类型，metrics为VFL语句中用到的具体数值，views为VFL语句中用到的控件。
 7. 基于Autolayout的动画：   在修改了约束之后，只要执行下面代码，就能做动画效果   `[UIView animateWithDuration:1.0 animations:^{     [添加了约束的view layoutIfNeeded];  }];`
 
-### 传感器
+#### 传感器
 1. 定义：传感器是一种感应/检测装置。
 2. 作用：用于感应/检测设备周边的信息。不同类型的传感器，检测的信息也不一样。
 3. 应用场景：
@@ -368,7 +404,7 @@ IBOutlet
       * UIAccelerometer：iOS4以前，iOS5已过期，用法简单，部分程序还有残留。       `// 获得单例对象       UIAccelerometer *accelerometer = [UIAccelerometer sharedAccelerometer];       // 设置代理       accelerometer.delegate = self;      // 设置采样间隔       accelerometer.updateInterval = 1.0 / 30.0; // 1秒钟采样30次      // 实现代理方法，accelerometer中x、y、z分别代表每个轴上的加速度       - (void)accelerometer:(UIAccelerometer *)accelerometer        didAccelerate:(UIAcceleration *)acceleration`
        * CoreMotion：iOS4以后，不仅提供了实时的加速度值和旋转速度值，还集成了很多好的算法。可通过push(实时采集所有数据，采集频率高)和pull(在有需要的时候，再主动去采集数据)两种方式获取数据。    `// 创建运动管理者对象    CMMotionManager *mgr = [[CMMotionManager alloc] init];    // 判断加速计是否可用    if (mgr.isAccelerometerAvailable) {       // 加速计可用    }    // pull    // 开始采样    - (void)startAccelerometerUpdates;    // 在需要的时候采集加速度数据    CMAcceleration acc = mgr.accelerometerData.acceleration;          // push    // 设置采样间隔     mgr.accelerometerUpdateInterval = 1.0 / 30.0;       // 开始采样，采样到数据就会调用handler、handler会在queue中执行      - (void)startAccelerometerUpdatesToQueue:(NSOperationQueue *)queue      withHandler:(CMAccelerometerHandler)handler;`
 
-### 数据存储
+#### 数据存储
 1. Plist：自动存储数组、字典，但是数组和字典里面不能有自定义对象。
 2. Preference：偏好设置，NSUserDefaults。也不能存储自定义对象
 3. 归档：NSCoding(NSKeyedArchiver/NSKeyedUnarchiver)，存储自定义对象。一次性读取和存储操作，即一次只能读取或存储所有内容。
@@ -376,17 +412,17 @@ IBOutlet
 5. Core Data
 
 ## 其他
-### 退出键盘方式
+#### 退出键盘方式
 * resignFirstResponder: 当叫出键盘的那个控件(第一响应者)调用这个方法时，就能退出键盘。
 * endEditing: 只要调用这个方法的控件内部存在第一响应者，就能退出键盘。
 
-### 通常开发流程
+#### 通常开发流程
 * 搭建软件界面(UI)。
 * 获取网络数据(多线程、网络)。
 * 解析网络数据(json、xml)。
 * 展示数据到界面(UI)。
 
-### instancetype
+#### instancetype
 * 在类型表示上，跟id一样，可以表示任何对象类型。
 * 只能用在返回值类型上，不能像id一样用在参数类型上。
 * 比id多一个好处：编译器会检测instancetype的真实类型，若不匹配会报警告⚠️。 

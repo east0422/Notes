@@ -14,3 +14,4 @@ print(strArr.map({ (str) -> Int in
 print(strArr.map({
     return $0.count
 }))
+
