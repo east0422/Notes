@@ -14,15 +14,35 @@
 
 #### NSTimer
 1. 启动定时器的两种方法
-  * 
-```timerWithTimeInterval需要手动将timer加入到消息循环中：     NSTimer *timer = [NSTimer timerWithTimeInterval:2.0 target:self selector:       @selector(nextImage) userInfo:nil repeats:YES]; 
-    NSRunLoop *loop = [NSRunLoop currentRunLoop];     [loop addTimer:timer forMode:NSDefaultRunLoopMode];     [timer fire]; //这个方法仅仅是提前执行timer要执行的方法
-```
-  * 
-```scheduledTimerWithTimeInterval自动把timer加入到消息循环中，默认NSDefaultRunLoopMode：
-    NSTimer *timer = [NSTimer scheduledTimerWithTimeInterval:1.0 target:self          selector:@selector(nextImage) userInfo:nil repeats:YES]; 
-```
-  * 注意：如果当前线程run loop处UIEventTrackingRunLoopMode模式会不处理定时器事件。 
+	* timerWithTimeInterval
+
+	```
+	// timerWithTimeInterval需要手动将timer加入到消息循环中：
+	NSTimer *timer = [NSTimer timerWithTimeInterval:2.0 target:self selector: @selector(nextImage) userInfo:nil repeats:YES];
+	NSRunLoop *loop = [NSRunLoop currentRunLoop];
+	[loop addTimer:timer forMode:NSDefaultRunLoopMode];
+	// 立即触发该定时器，这个方法仅仅是提前执行timer要执行的方法
+	[timer fire];
+	```
+  * scheduledTimerWithTimeInterval
+
+	```
+	// scheduledTimerWithTimeInterval自动把timer加入到当前runloop消息循环中，默认NSDefaultRunLoopMode。如果当前线程run loop处于UIEventTrackingRunLoopMode模式下会不处理该定时器事件
+	NSTimer *timer = [NSTimer scheduledTimerWithTimeInterval:1.0 target:self selector:@selector(nextImage) userInfo:nil repeats:YES]; 
+	```
+2. 如果想要销毁timer，则必须先将timer置为失效，否则timer就一直占用内存而不会释放。造成逻辑上的内存泄漏。该泄漏不能用xcode及instruments测出来。另外对于要求必须销毁timer的逻辑处理，未将timer置为失效，若每次都创建一次，之前的不能得到释放，则会同时存在多个timer的实例在内存中。
+3. 注意点
+	* timer添加到runloop时设置为哪种mode。
+	* timer在不需要时，一定要调用invalidate方法使定时器失效，否则得不到释放。
+
+#### CADisplayLink
+1. CADisplayLink是一种以屏幕刷新频率触发的时钟机制，即是一个和屏幕刷新率一致的定时器，每秒钟执行大约60次左右。
+2. CADisplayLink是一个计时器，可以使绘图代码与视图的刷新频率保持同步，而NSTimer无法确保计时器实际被触发的准确时间。
+3. 使用方法：
+	1. 定义CADisplayLink并制定触发调用方法。
+	2. 将CADisplayLink添加到主运行循环队列。
+4. Timer的tolerance表示最大延期时间，如果因为阻塞错过了这个时间精度，这个时间点的回调也会跳过去，不会延后执行。
+5. CADisplayLink如果在两次屏幕刷新之间执行了一个长任务，那其中就会有一帧被跳过去(和NSTimer类似，只是没有tolerance容忍时间)，造成界面卡顿的感觉。
 
 #### pch文件
 1. pch文件也是一个头文件，里面的内容能被项目中的其他所有源文件共享和访问
@@ -90,29 +110,6 @@
 1. 实现NSCoding协议
 2. 实现-encodeWithCoder:(NSCoder *)encoder；和  - (instancetype)initWithCoder:(NSCoder *)aDecoder;
 3. 使用NSKeyedArchiver和NSKeyedUnarchiver分别归/解档
-
-#### JSON
-1. 定义
-  是一种轻量级的数据格式，一般用于数据交互。本质上是一个特殊格式的非NSString字符串。
-2. JSON解析
-  1. 第三方框架：JSONKit  > SBJson > TouchJSON (性能从左到右，越差)。
-  2. 苹果原生NSJSONSerialization(性能最好)
-    	* JSON数据 —> OC对象`+ (id)JSONObjectWithData:(NSData *)data options:(NSJSONReadingOptions)opt error:(NSError **)error`
-     * OC对象 —> JSON数据`+ (NSData *)dataWithJSONObject:(id)obj options:(NSJSONWritingOptions)opt error:(NSError **)error`；
-
-#### XML
-1. 定义：和JSON一样，也是常用的一种用于交互的数据格式。
-2. 文档声明：在XML文档的最前面，必须编写一个文档声明，用来声明XML文档的类型，如<?xml version=“1.0” encoding=“UTF-8” ?> // encoding属性说明文档的字符编码
-3. XML解析
-   1. 第三方框架
-      * libxml2：纯C语言，默认包含在iOS SDK中，同时支持DOM和SAX方式解析。
-      * GDataXML：DOM方式解析，由Google开发，基于libxml2。
-   2. 苹果原生NSXMLParser(SAX方式解析，使用简单)
-      * 使用步骤 `// 传入XML数据，创建解析器 NSXMLParser *parser = [[NSXMLParser alloc] initWithData:data]; // 设置代理，监听解析过程 parser.delegate = self;
-        // 开始解析
-        [parser parse];`
-      * NSXMLParserDelegate
-		`// 当扫描到文档的开始时调用(开始解析) 		 - (void)parserDidStartDocument:(NSXMLParser *)parser;  		// 当扫描到文档的结束时调用(解析完毕) 		 - (void)parserDidEndDocument:(NSXMLParser *)parser;  		// 当扫描到元素的开始时调用(attributeDict存放着元素的属性) 		- (void)parser:(NSXMLParser *)parser didStartElement:(NSString *)elementName namespaceURI:(NSString *)namespaceURI qualifiedName:(NSString *)qName attributes:(NSDictionary *)attributeDict 		// 当扫描到元素的结束时调用 		- (void)parser:(NSXMLParser *)parser didEndElement:(NSString *)elementName namespaceURI:(NSString *)namespaceURI   qualifiedName:(NSString *)qName`
 
 #### Cookie
 1. 定义：由服务器端生成，发送给客户端，客户端将Cookie的Key/value保存到某个目录下的文本文件内。如果客户端支持Cookie，下次请求同一网站时就可以将Cookie直接发送给服务器。Cookie名称和值由服务器端开发自己定义。iOS程序中默认支持Cookie，不需任何处理，若服务器返回Cookie，会自动保存在沙盒的Library/Cookies目录中。
