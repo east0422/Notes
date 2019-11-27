@@ -2,5 +2,10 @@
 <Timeline
    version = "3.0">
    <TimelineItems>
+      <LoggerValueHistoryTimelineItem
+         documentLocation = "file:///Users/NewAdmin/East/EastGithub/Notes/ios/iOSSingleView.playground#CharacterRangeLen=8&amp;CharacterRangeLoc=1865&amp;EndingColumnNumber=17&amp;EndingLineNumber=45&amp;StartingColumnNumber=9&amp;StartingLineNumber=45&amp;Timestamp=591099334.5340329"
+         selectedRepresentationIndex = "0"
+         shouldTrackSuperviewWidth = "NO">
+      </LoggerValueHistoryTimelineItem>
    </TimelineItems>
 </Timeline>

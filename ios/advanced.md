@@ -98,10 +98,6 @@
 5. 大部分GCD方法不会造成循环引用(如`dispatch_async(dispatch_get_main_queue(), ^{[self doSomething];})`)，因为self并没有对GCD的block进行持有，没有形成循环引用，在block中可以直接使用self。
 6. MRC下一个变量如果不加__block是不能在block里面修改的，不过例外的是static的变量和全局变量不需要加__block就可以在block中修改。
 
-#### SDWebImage
-1. 默认缓存时长一周，SDImageCacheConfig中  static const NSInteger kDefaultCacheMaxCacheAge = 60 * 60 * 24 * 7; // 1 week 
-2. 防止url对应图片重复下载：先看icon->再看内存缓存->沙盒缓存，如果已经存在于下载队列中就不再添加到里面。
-
 #### ip查询
 1. 获得本机真实ip地址：https://httpbin.org/ip, 通常是接入家庭的光猫ip地址得到的
 2. 查询ip详细信息：http://ip.taobao.com/service/getIpInfo.php?ip=171.113.94.94，查询ip对应的物理位置
@@ -177,33 +173,6 @@
 		* UIAttachmentBehavior: 附着行为
 		* UIDynamicItemBehavior: 动力元素行为。
 	3. 物理仿真器(Dynamic Animator)：让物理仿真元素执行具体的物理仿真行为。是UIDynamicAnimator类型的对象。初始化: - (instancetype)initWithReferenceView:(UIView *)view;其中view参数是一个参照视图，表示物理仿真的范围。注意：不是任何对象都能做物理仿真元素，不是任何对象都能进行物理仿真。
-
-#### AutoLayout
-1. 定义：是一种“自动布局”技术，专门用来布局UI界面。自iOS6开始引入，自iOS7(Xcode5)开始得到较大推广。
-2. 核心：
-	1. 参照
-	2. 约束
-3. 警告和错误
-	1. 警告：控件的frame不匹配所添加的约束，比如约束控件的宽度为100，而控件现在的宽度是110。
-	2. 错误：
-		* 缺乏必要的约束，比如只约束了宽度和高度，没有约束具体的位置。
-		* 两个约束冲突，比如1个约束控件的宽度为100，1个约束控件的宽度为110
-4. 添加约束的规则：  在创建约束之后，需要将其添加到作用的view上，在添加时要注意目标view需要遵循以下规则：
-   1. 对于两个同层级view(兄弟view)之间的约束关系，添加到它们的父view上。
-   2. 对于两个不同层级view之间的约束关系，添加到它们最近的共同父view上。
-   3. 对于有层次关系的两个view之间的约束关系，添加到层级较高的父view上。总之对于两个view之间的约束关系添加到它们最近的一个共同祖先view上。
- 5. 代码实现
-    1. 利用NSLayoutConstraint类创建具体的约束对象 + (id)constraintWithItem:(id)view1 attribute:(NSLayoutAttribute)attr1 relatedBy:(NSLayoutRelation)relation toItem:(id)view2 attribute:(NSLayoutAttribute)attr2      multiplier:(CGFloat)multiplier constant:(CGFloat)c;其中view1为要约束的控件，attr1约束的类型(做怎样的约束)，releation与参照控件之间的关系，view2参照的控件，attr2约束的类型，multiplier乘数，c常量。
-    2. 添加约束对象到相应的view上  - (void)addConstraint:(NSLayoutConstraint *)constraint;   - (void)addConstraints:(NSArray *)constraints;  注意点：a. 要先禁止autoresizing功能，设置view下面属性为NO； view.translatesAutoresizingMaskIntoConstraints = NO;b. 添加约束前，一定要保证相关控件都已经在各自的父控件上。c. 不用再给view设置frame。
-6. VFL
-	1. 定义：VFL全称是Visual Format Language，可视化格式语言，是苹果公司为了简化Autolayout的编码而推出的抽象语言。
-	2. 示例：
-		* H:[cancelButton[72]]-12-[acceptButton[50]] cancelButton宽72、acceptButton宽50、它们之间间距12。
-		* H:[wideView[>=60@700]] wideView宽度大于等于60point、该约束条件优先级为700(优先级最大值为1000、优先级越高的约束越先被满足)。
-		* V:[redBox][yellowBox(==redBox)] 竖直方向上先有一个redBox、其下方紧接一个高度等于redBox高度的yellowBox。
-		* H:I-10-[Find]-[FindNext]-[FindField[>=20]]-I水平方向上、Find距离父view左边缘默认间隔宽度、之后FindNext距离Find间隔默认宽度、再之后是宽度不小于20的FindField、它和FindNext以及父view右边缘的间距都是默认宽度。(竖线“|”表示superview的边缘)。
-	3. 使用VFL来创建约束数组  + (NSArray *)constraintsWithVisualFormat:(NSString *)format options:(NSLayoutFormatOptions)opts metrics:(NSDictionary *)metrics views:(NSDictionary *)views;其中format为VFL语句，opts约束类型，metrics为VFL语句中用到的具体数值，views为VFL语句中用到的控件。
-7. 基于Autolayout的动画：   在修改了约束之后，只要执行下面代码，就能做动画效果   `[UIView animateWithDuration:1.0 animations:^{     [添加了约束的view layoutIfNeeded];  }];`
 
 #### 传感器
 1. 定义：传感器是一种感应/检测装置。
