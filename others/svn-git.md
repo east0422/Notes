@@ -55,6 +55,46 @@
 10. 回到指定版本号的版本 git reset --hard 89f88fd。
 11. 查看分支引用记录 git reflog。
 
+#### 迁移仓库到新仓库并且保留提交记录(有大小限制)
+1. github和gitlab等都有导入仓库，直接操作即可。
+2. 先下载到本地，再上传到新仓库。
+	1. 从原地址克隆裸版本库`git clone --bare https://192.168.10.XX/git_repo/project_name.git`
+	2. 进入project_name.git目录`cd project_name.git`
+	3. 以镜像推送到新服务器(会覆盖new_project_name仓库中的现有内容)`git push --mirror git@192.168.20.XX/path/to/path/new_project_name.git`
+3. 将本地仓库迁移
+	
+	```
+	cd existing_repo
+	// 更改origin新地址
+	git remote set-url origin https://XXX/git_repo/test.git
+	git push -u origin --all -f(远程上若有文件就强推)
+	git push -u origin --tags -f(远程上若有文件就强推)
+	```
+4. 若仓库比较大则需要安装git-lfs，大文件常和3一起配合使用
+	
+	```
+	// 安装
+	brew install git-lfs
+	// 为每个账号只需要运行一次
+	git lfs install
+	// 使用Git LFS管理后缀psd文件
+	git lfs track "*.psd"
+	// .gitattributes指定lfs跟踪文件，将其加入版本控制中
+	git add .gitattributes
+	// 提交.gitattributes
+	git commit -m 'something'
+	
+	// 列出最占空间的类型
+	// git lfs migrate info
+	// 将mp3和psd文件转换为LFS
+	// git lfs migrate import --include="*.mp3,*.psd"
+	```
+	5. 使用git lfs必须在提前在前面的commit上使用在后面的commit上才有用，如果文件不是太重要，可以删除
+	
+	```
+	git filter-branch --force --index-filter 'git rm -rf --cached --ignore-unmatch videos/temp.mp4' --prune-empty --tag-name-filter cat -- --all
+	```
+
 
 
 
