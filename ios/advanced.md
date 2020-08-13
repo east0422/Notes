@@ -6,14 +6,20 @@
 
 #### load与initialize方法
 1. +(void)load：
-	* 当类对象被引入项目时，runtime会向每一个类对象发送load消息。
+	* 当类对象被引入项目时(.m文件加入到Compile Sources中)无论工程项目中是否有使用到该类对象，runtime都会在main函数之前向每个类对象发送一次load消息。
 	* load方法会在每一个类甚至分类被引入时仅调用一次，调用的顺序：父类优先于子类，子类优先于分类。
-	* load方法不会被类自动继承。 
+	* load方法不会被类自动继承，也不会被覆盖，所有的load方法都会被执行。 
 2. +(void)initialize：
-	* 也是在第一次使用这个类的时候会调用这个方法。
+	* 在第一次使用这个类或子类时有且仅调用一次这个方法，如果该类一直没被用到就不会被调用。
+	* 会被覆盖，若子类实现了该方法会直接执行子类而不会再执行父类的了，若分类实现了该方法会直接执行分类而不会再执行主类的，覆盖顺序：分类覆盖子类，子类覆盖父类。
+3. load和initialize会被自动调用，不能手动调用它们，内部都使用了锁都是线程安全的。
 
 #### NSTimer
-1. 启动定时器的两种方法
+1. 计时器只能调用实例方法，但是可以在这个实例方法里面调用静态方法([[self class] staticMethod];)。
+2. 计时器和runloop配合使用，runloop维护计时器的强引用，当把计时器加入到runloop以后你不需要再维护自己对计时器的强引用。
+3. 使用计时器需要注意，计时器一定要加入Runloop中，并且选好model才能运行。三个scheduledTimerWithTimeInterval:类方法都会创建一个计时器并加入到当前runloop中(使用default模式)，所以可以直接使用。
+4. 若计时器的repeats为YES则这个计时器会重复执行，一定要在合适的时机调用计时器的invalid。不能在dealloc中调用，因为一旦设置repeats为YES，计时器会强持有self导致dealloc永远不会被调用，这个类就永远无法被释放。可以在viewDidDisappear中调用，这样当类需要被回收时就可以正常进入dealloc中了。
+5. 启动定时器不同两种方法
 	* timerWithTimeInterval
 
 	```
@@ -30,8 +36,8 @@
 	// scheduledTimerWithTimeInterval自动把timer加入到当前runloop消息循环中，默认NSDefaultRunLoopMode。如果当前线程run loop处于UIEventTrackingRunLoopMode模式下会不处理该定时器事件
 	NSTimer *timer = [NSTimer scheduledTimerWithTimeInterval:1.0 target:self selector:@selector(nextImage) userInfo:nil repeats:YES]; 
 	```
-2. 如果想要销毁timer，则必须先将timer置为失效，否则timer就一直占用内存而不会释放。造成逻辑上的内存泄漏。该泄漏不能用xcode及instruments测出来。另外对于要求必须销毁timer的逻辑处理，未将timer置为失效，若每次都创建一次，之前的不能得到释放，则会同时存在多个timer的实例在内存中。
-3. 注意点
+6. 如果想要销毁timer，则必须先将timer置为失效，否则timer就一直占用内存而不会释放。造成逻辑上的内存泄漏。该泄漏不能用xcode及instruments测出来。另外对于要求必须销毁timer的逻辑处理，未将timer置为失效，若每次都创建一次，之前的不能得到释放，则会同时存在多个timer的实例在内存中。
+7. 注意点
 	* timer添加到runloop时设置为哪种mode。
 	* timer在不需要时，一定要调用invalidate方法使定时器失效，否则得不到释放。
 
