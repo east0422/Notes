@@ -8,6 +8,8 @@
 ## Build generated
 build/
 DerivedData/
+node_modules/
+dist/
 
 ## Various settings
 *.pbxuser
