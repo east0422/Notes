@@ -147,8 +147,21 @@
 
 9. 模块打包工具(Bundler)
 * 将浏览器不支持的模块进行编译、转换、合并，并且最后生成的代码可以在浏览器端良好运行的工具。
+* RequireJS
+  ```
+  RequireJS是一个JavaScript模块加载器，基于AMD规范实现。同时也提供了对模块进行打包与构建的工具r.js，通过将开发时单独的匿名模块具名化并进行合并，实现线上页面资源加载的性能优化。RequireJS从入口文件开始，递归地进行静态分析，找出所有直接或间接被依赖(require)的模块，然后进行转换与合并。
+  // bundle.js
+  define('hello', [], function(require){
+    module.exports = 'hello!';
+  });
+  define('say', ['require', 'hello'], function(require){
+    var hello = require('./hello');
+    console.log(hello); // hello!
+  })
+  ```
 * browerify
   ```
+  browserify是一个以在浏览器中使用Node.js模块为出发点的工具。对CommonJS规范(Node.js模块所采用的规范)的模块代码进行的转换与包装；对很多Node.js的标准package进行了浏览器端的适配，只要是遵循CommonJS规范的JavaScript模块，即使是纯前端代码，也可以使用它进行打包。
   // add.js
   module.exports = function(x, y) {
     return x + y;
@@ -157,4 +170,8 @@
   var add = require('./add');
   console.log(add(2, 3)); // 5
   // 使用browserify处理打包browserify test.js > bundle.js，生成的bundle.js是已经处理完毕，可供浏览器使用的文件，只需插入到<script>标签里面即可
+  ```
+* webpack
+  ```
+  webpack支持AMD和CommonJS类型，通过loader机制也可以使用ES6的模块格式。通过一个config文件能提供更加丰富的功能，支持多种静态文件，有强大的代码拆分与异步加载等。
   ```
