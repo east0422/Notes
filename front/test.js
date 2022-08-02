@@ -34,7 +34,7 @@
 //   })(100)
 // );
 
-//仍然是预解析(在与解析过程中还要考虑一下当前变量的作用于)
+//仍然是预解析(在与解析过程中还要考虑一下当前变量的作用域)
 function m() {
   console.log(a1); // underfined
   console.log(a2); // underfined
@@ -72,7 +72,20 @@ var myperson={
   age : 25,
   sex : "male",
   introduction:function(){
-    console.log(name+age+sex);
+    console.log(this.name+this.age+this.sex);
   }
 };
-myperson.introduction();
+// myperson.introduction(); // Zhang25male
+
+var person1 = new Object()
+person1.name = 'east'
+person1.age = 18
+person1.greeting = function() {
+  console.log('Hi, I\'m ' + this.name + ' and ' + this.age + ' years old!')
+}
+// person1.greeting() // Hi, I'm east and 18 years old!
+function doSomething() {}
+doSomething.prototype.foo = 'bar'
+var dost1 = new doSomething()
+dost1.prop = 'some value'
+console.log(dost1)

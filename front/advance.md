@@ -14,7 +14,8 @@
 #### 原型规则
   1. 所有的引用类型(数组，对象，函数)都具有对象特性，即可以自由扩展属性(null除外)。
   2. 所有的引用类型(数组，对象，函数)都有一个__proto__属性(隐式原型)，属性值是一个普通的对象。
-  3. 所有的函数都有一个prototype属性(显式原型)，属性值也是一个普通对象。
+  3. 所有的函数对象(Function)都有一个prototype属性(显式原型)，属性值也是一个普通对象，并且只有函数对象有prototype属性，因为prototype本身就是定义 
+    在Function对象下的属性。当我们输入类似var person1 = new Person(...)来构造对象时，JavaScript实际上参考的是Person.prototype指向的对象来生成person1。另一方面，Person()函数是Person.prototype的构造函数，也就是说Person===Person.prototype.constructor // true
   4. 所有的引用类型(数组，对象，函数)__proto__属性(隐式原型)值指向它的构造函数的prototype属性值(显式原型)。
    `var obj = {}; obj.__proto__ === Object.prototype; // true`
   5. 当试图得到一个对象的某个属性时，如果这个对象本身没有这个属性，那么会去它的__proto__(即它的构造函数的prototype)中寻找。
