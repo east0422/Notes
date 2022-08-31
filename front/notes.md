@@ -46,6 +46,55 @@
       // console.log(f); // 报错ReferenceError: f is not defined
       ```
 
+#### 回流与重绘
+  1. 当渲染树中的一部分(或全部)因为元素的规模尺寸，布局，隐藏等改变而需要重新构建，称为回流(reflow)。每个页面至少需要一次回流(第一次加载时)。在回流的时候，浏览器会使渲染树中受到影响的部分失效，并重新构造这部分渲染树。完成回流后浏览器会重新绘制受影响的部分到屏幕中，该过程称为重绘(redraw)。
+
+#### isNaN检测机制
+  1. 首先验证当前要检测的值是否为数字类型的，如果不是浏览器会默认把值转化为数字类型，把非数字类型的值转换为数字。
+     - 其他基本类型转换为数字，直接使用Number方法转换
+        ```
+        // 字符串转数字
+        Number('13') -> 13;
+        Number('13.05') -> 13.05;
+        Number('13px') -> NaN; // 若当前字符串中出现任意一个非有效数字字符结果则为NaN
+        // 布尔转数字
+        Number(true) -> 1;
+        Number(false) -> 0;
+        // 其他
+        Number(undefined) -> NaN;
+        Number(null) -> 0;
+        ```
+     - 引用数据类型转换为数字，引用值先调用toString方法转换为字符串，然后再把字符串调取Number转换为数字
+        ```
+        // 对象
+        ({}).toString() -> '[object Object]' -> NaN
+        // 数组
+        [1, 2].toString() -> '1,2' -> NaN
+        [1].toString() -> '1' -> 1
+        [].toString() -> '' -> 0
+        // 正则
+        /^$/.toString() -> '/^$/' -> NaN
+        ```  
+  2. 当前检测的值已经是数字类型，是有效数字返回false，不是返回true(数字类型中只有NaN不是有效数字，其余都是有效数字)。
+  3. NaN和谁都不相等(包括自己 NaN == NaN -> false)，检查一个变量num存储的值是否为一个有效数字只能使用isNaN(num)
+
+#### ==比较
+  1. 若两边数据类型不一样则先转换为相同类型(数字)再进行比较
+  2. 对象==对象不一定相等，因为对象操作的时引用地址，地址不相同则不相等`{} == {} -> false;[] == [] -> false`
+  3. 特殊情况`null == undefiend -> true; null == undefined -> false; [] == true -> false; ![] == true -> false`
+
+#### parseInt于parseFloat
+  1. 与Number类似，同样是为了把其他类型值转换为数字类型，与Number区别的地方在于字符串转换分析上。
+  2. 从字符串最左侧字符开始查找有效数字字符，并且转换为数字，一旦遇到非有效数字字符查找结束。
+      ```
+      // Number出现任意非有效数字字符结果就是NaN，parseInt把一个字符串左侧中的整数部分解析出来，pareseFloat把一个字符串左侧小数(浮点数)部分解析出来
+      Number('13.5px') -> NaN
+      parseInt('13.5px') -> 13
+      parseFloat('13.5px') -> 13.5
+      parseInt('aa13.5px') -> NaN
+      parseFloat('aa13.5px') -> NaN
+      ``` 
+
 #### form中input设置readonly和disabled区别
   1. readonly不可编辑，但可选择和复制，值可传递到后台。
   2. disabled不可编辑，不能选择和复制，值也不可以传递到后台。
