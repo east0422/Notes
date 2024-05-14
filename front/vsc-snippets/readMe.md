@@ -1,0 +1,1 @@
+将代码片段snippet拷贝到visual studio code对应位置即可(C:\Users\Admin\AppData\Roaming\Code\User\snippets)

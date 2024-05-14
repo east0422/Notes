@@ -1,4 +1,2 @@
 # notes
-	collect the notes that is interesting, difficult and easy to ignore。
-
-
+	工作学习及解决问题的一些相关记录。

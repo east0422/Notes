@@ -1,0 +1,99 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+.fill {
+  flex: 1;
+}
+.vcontainer {
+  display: flex;
+  flex-direction: column;
+}
+.hcontainer {
+  display: flex;
+  flex-direction: row;
+}
+.vcenter {
+  align-content: center;
+  align-items: center;
+}
+.hcenter {
+  justify-content: center;
+  justify-items: center;
+}
+.flex-around {
+  justify-content: space-around;
+}
+.flex-between {
+  justify-content: space-between;
+}
+.flex-end {
+  justify-content: flex-end;
+}
+
+// 超出1行显示省略号
+.o-line-1 {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+// 超出1行显示省略号
+.o-line-2 {
+  display: -webkit-box !important;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  word-break: break-all;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical !important;
+}
+// 超出3行显示省略号
+.o-line-3 {
+  display: -webkit-box !important;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  word-break: break-all;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical !important;
+}
+.clickable {
+  cursor: pointer;
+}
+
+
+// 从左侧渐入动画
+.fade-in-left {
+  animation: fadeInLeft;
+  animation-fill-mode: both;
+  animation-duration: 0.5s;
+}
+@keyframes fadeInLeft {
+  from {
+    opacity: 0;
+    -webkit-transform: translate3d(-30%, 0, 0);
+    transform: translate3d(-30%, 0, 0);
+  }
+  to {
+    opacity: 1;
+    -webkit-transform: translate3d(0, 0, 0);
+    transform: translate3d(0, 0, 0);
+  }
+}
+// 从右侧渐入动画
+.fade-in-right {
+  animation: fadeInRight;
+  animation-fill-mode: both;
+  animation-duration: 0.5s;
+}
+@keyframes fadeInRight {
+  from {
+    opacity: 0;
+    -webkit-transform: translate3d(130%, 0, 0);
+    transform: translate3d(130%, 0, 0);
+  }
+  to {
+    opacity: 1;
+    -webkit-transform: translate3d(0, 0, 0);
+    transform: translate3d(0, 0, 0);
+  }
+}
