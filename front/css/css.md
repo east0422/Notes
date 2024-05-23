@@ -55,13 +55,37 @@
   - content-box(默认)，标准盒子模型(宽度=设置宽度(content)+border+padding+margin)width与height只包括内容的宽和高，不包括边框(border)、内边距(padding)、外边距(margin)。注意：内边距、边框和外边距都在这个盒子的外部。比如 .box {width: 350px; border: 10px solid black; padding: 15px; margin: 18px;}在渲染的实际宽度将是400px(350 + 10*2 + 15*2)
   - border-box怪异盒子/IE盒子模型(宽度=设置宽度(content+border+padding)+margin)width和heigh属性包括内容、内边距和边框，但不包括外边距。比如.box {width: 350px; border: 10px solid black; padding: 15px; margin: 18px;}在渲染的实际宽度将是300px(350 - 10*2 - 15*2)
 
-### 重绘与回流(重排)
-  - 当渲染树中的一部分(或全部)因为元素的规模尺寸，布局，隐藏等改变而需要重新构建，称为回流(reflow)。每个页面至少需要一次回流(第一次加载时)。在回流的时候，浏览器会使渲染树中受到影响的部分失效，并重新构造这部分渲染树。完成回流后浏览器会重新绘制受影响的部分到屏幕中，该过程称为重绘(redraw)。
-  - 重排也称为回流。当DOM的变化影响了元素的几何信息(DOM对象的位置和尺寸大小)，浏览器需要重新计算元素的几何属性，将其安放在界面中的正确位置，这个过程叫做重排。触发：添加或者删除可见的DOM元素、元素尺寸改变——边距、填充、边框、宽度和高度。
-  - 当一个元素的外观发生改变，但没有改变布局，重新把元素外观绘制出来的过程叫做重绘。触发：改变元素的color、background、box-shadow等属性。
-  - 重排重绘优化建议：
-    - 样式表越简单，重排和重绘就越快。尽量用class，少用style一条条改变样式。
-    - 重排和重绘的DOM元素层级越高，成本就越高。如果可以灵活用display，absolute，flex等重排开销会比较小，或不会影响其他元素的重排。
-    - 使用虚拟DOM的脚本库。
+### DOM
+  - 当浏览器加载html页面时首先就是DOM结构的计算，计算出来的DOM结构就是DOM树(把页面中html标签像树状结构一样分析出之间的层级关系)。DOM树描述了标签间的关系(节点间的关系)，只要知道任何一个标签都可以依据DOM中提供的属性和方法获取到页面中任意一个标签或节点。
 
-### 
+### 浏览器渲染机制
+  - 浏览器采用流式布局模型(Flow Based Layout)，浏览器会把HTML解析成DOM，把CSS解析成CSSOM，DOM和CSSOM合并就产生了渲染树(Render Tree)。有了Render Tree我们就知道了所有节点的样式，然后计算他们在页面上的大小和位置，最后把节点绘制到页面上。由于浏览器使用流式布局，对Render Tree的计算通常只需要遍历一次就可以完成，但table及其内部元素除外，他们可能需要多次计算，通常要花3倍于同等元素的时间，这也是为什么要避免使用table布局的原因之一。
+
+### 重绘
+  - 当一个元素的外观发生改变(color、background、box-shadow、outline、visibility等属性)，但没有改变布局，重新把元素外观绘制出来的过程叫做重绘。
+  - 常用会导致重绘的属性：color,background,background-image,backgroud-position,background-repeat,background-size,outline,outline-color,outline-style,outline-width,border-style,border-radius,visibility,text-decoration,box-shadow。
+
+### 回流(重排)
+  - 回流也称为重排。当DOM变化影响了元素的几何信息(DOM对象的位置和尺寸大小)，浏览器需要重新计算元素的几何属性，将其安放在界面中的正确位置，这个过程叫做回流。
+  - 引发回流发生的一些因素有：页面首次渲染、浏览器窗口大小发生变化、添加或删除可见的DOM元素、元素尺寸或位置变化(边距、填充、边框、宽度和高度)、元素字体大小变化、内容变化(eg:用户在input框中输入文字, CSS3动画，文字数量或者图片大小改变等)。
+  - 常用且会导致回流的属性和方法：width,height,margin,padding,border,clientWidth,clientHeight,clientTop,clientLeft,offsetWidth,offsetHeight,offsetTop,offsetLeft,scrollWidth,scrollHeight,scrollTop,scrollLeft,scrollIntoView(),getComputedStyle(),getBoundingClientRect()。
+
+### 减少重绘与回流
+  - 使用transform替代top。
+  - 使用visibility替代display: none，因为前者只会引起重绘，后者会引发回流(改变了布局)。
+  - 避免使用table布局，可能很小的一个小改动会造成整个table的重新布局。
+  - 避免使用CSS表达式(如：calc())。
+  - 尽可能在DOM树的最末端改变class，回流是不可避免的，但可以减少其影响，限制了回流的范围使其影响尽可能少的节点。
+  - 避免设置多层内联样式，CSS选择符从右往左匹配查找，避免节点层级过多。
+  - 将动画效果应用到position属性为absolute或fixed的元素上，避免影响其他元素的布局，这样只是一个重绘，而不是回流。同时控制动画速度可以选择requestAnimationFrame避免使用CSS表达式，可能会引发回流。
+  - 避免频繁操作样式，最好一次性重写style属性，或者将样式列表定义为class并一次性更改class属性。
+  - 把DOM离线后修改，可以先设置display: none，操作结束后再把它显示出来。因为在display属性为none的元素上进行的DOM操作不会引发回流和重绘。
+  - 避免频繁读取会引发回流/重绘的属性，如果确实需要多次使用，就用一个变量缓存起来。
+  - 对具有复杂动画的元素使用绝对定位，使它脱离文档流，否则会引起父元素及后续元素频繁回流。
+
+### 重绘与回流优化
+  - 回流必定会发生重绘，重绘不一定会引发回流。回流比重绘的代价要更高。
+  - 样式表越简单，重排和重绘就越快。尽量用class，少用style一条条改变样式。
+  - 重排和重绘的DOM元素层级越高，成本就越高。如果可以灵活用display，absolute，flex等重排开销会比较小，或不会影响其他元素的重排。
+  - 使用虚拟DOM的脚本库。
+  - 浏览器会维护一个队列,把所有引起回流和重绘的操作放入到队列中,如果队列中的任务数量或者时间间隔达到一个阈值,浏览器会将队列清空,进行一次批处理,这样可以把多次回流和重绘变成一次。
