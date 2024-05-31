@@ -89,3 +89,95 @@
   - 重排和重绘的DOM元素层级越高，成本就越高。如果可以灵活用display，absolute，flex等重排开销会比较小，或不会影响其他元素的重排。
   - 使用虚拟DOM的脚本库。
   - 浏览器会维护一个队列,把所有引起回流和重绘的操作放入到队列中,如果队列中的任务数量或者时间间隔达到一个阈值,浏览器会将队列清空,进行一次批处理,这样可以把多次回流和重绘变成一次。
+
+### 水平垂直居中
+  - 子元素在父元素中水平垂直居中显示
+    ```
+    <div class="parent1 parent"><div class="child1 child"></div></div>
+    .parent1 {
+      width: 400px;
+      height: 300px;
+      background-color: #f0f8ff;
+      .child1 {
+        width: 50px;
+        height: 80px;
+        background-color: #00ffff;
+      }
+    }
+    // 方法1 flex布局
+    // 1.1
+    .parent {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    // 方法2 absolute布局
+    // 2.1
+    .parent {
+      position: relative;
+      .child {
+        position: absolute;
+        top: 50%; // top,left,bottom,right等百分比相对于父元素大小
+        left: 50%;
+        transform: translate(-50%, -50%); // translate百分比相对于自身大小
+      }
+    }
+    // 2.2
+    .parent {
+      position: relative;
+      .child {
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 0;
+        bottom: 0;
+        margin: auto;
+      }
+    }
+    // 2.3
+    .parent {
+      position: relative;
+      .child {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        margin-left: -25px;
+        margin-top: -40px;
+      }
+    }
+    // 方法3 grid网格
+    // 3.1
+    .parent {
+      display: grid;
+      justify-content: center;
+      align-content: center;
+    }
+    // 3.2
+    .parent {
+      display: grid;
+      .child {
+        justify-self: center;
+        align-self: center;
+      }
+    }
+    // 方法4 伪元素
+    .parent {
+      text-align: center;
+      &::before {
+        content: "";
+        display: inline-block;
+        width: 0;
+        height: 100%;
+        vertical-align: middle;
+      }
+      .child {
+        display: inline-block;
+        vertical-align: middle;
+      }
+    }
+    ``` 
+
+### opacity: 0与visibility: hidden及display:none对比
+  - opacity设置透明度，值为0元素不可见，占据页面空间。父元素0，自身1不可见。值为0可触发自身绑定事件。若遮挡住其他元素，则其他元素绑定事件不可触发。不会产生回流，不一定会产生重绘。
+  - visibility设置元素是否可见，值为hidden元素不可见，占据页面空间。父元素hidden，自身值设置为visible自身可见。值为hidden不可触发自身绑定事件。不会产生回流，会产生重绘。
+  - display定义元素显示类型，值为none元素不可见，不占据页面空间。父元素none，自身block不可见。值为hidden不可触发自身绑定事件。会产生回流，会产生重绘。

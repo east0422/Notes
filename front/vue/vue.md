@@ -26,4 +26,8 @@
     - 外部js、css文件放在最底下
     - 减少dom操作，尽可能用变量替代不必要的dom操作
 
-### 
+### v-if与v-show
+  - v-show动态控制DOM元素的显示和隐藏。当v-show值为false时，绑定DOM的display:none；当v-show值为true时，绑定DOM会移除display:none，此时并不是把display变为block，而是保持元素style的原始性。只是简单的基于CSS切换，不管初始条件是什么，元素总是会被渲染存在。值的更改不会触发组件的生命周期。
+  - v-if根据表达式值的真假来销毁或重建一个我们绑定的DOM元素，为false设置隐藏是将DOM元素整个删除，此时DOM元素不再存在。切换有一个局部编译/卸载的过程，切换过程中合适地销毁和重建内部的事件监听和子组件。v-if由false变为true时，触发组件的beforeCreate、create、beforeMount、mounter钩子，由true变为false时，触发组件的beforeDestory、destoryed方法。v-if是真正的条件渲染，它会确保在切换过程中条件块内的事件监听器和子组件适当地被销毁和重建；v-if也是惰性的，如果初始渲染时条件为假，则什么也不做——直到为真时才开始渲染条件块。
+  - v-show有更高的初始渲染消耗，v-if有更高的切换消耗。若需要非常频繁地切换，则使用v-show较好；若在运行时条件很少改变，则使用v-if较好。
+

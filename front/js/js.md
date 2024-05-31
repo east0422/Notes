@@ -177,6 +177,7 @@
     * bind返回的是一个新的函数，并未立即执行原函数
     * call参数需要一个个列举出来(thisValue, arg1, arg2, ...)，会立即执行原函数
     * apply参数是一个数组(thisValue, [arg1, arg2, ...])，会立即执行原函数
+    * call比apply的性能要好，call传入参数的格式正是内部所需要的格式
   - this优先级
     * new绑定优先级比bind绑定高。调用bind返回的新绑定函数，若被当做构造函数，使用new关键字调用，bind对this的绑定会被忽略
     * 箭头函数的优先级比call、apply高
