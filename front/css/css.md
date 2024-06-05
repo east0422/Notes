@@ -181,3 +181,51 @@
   - opacity设置透明度，值为0元素不可见，占据页面空间。父元素0，自身1不可见。值为0可触发自身绑定事件。若遮挡住其他元素，则其他元素绑定事件不可触发。不会产生回流，不一定会产生重绘。
   - visibility设置元素是否可见，值为hidden元素不可见，占据页面空间。父元素hidden，自身值设置为visible自身可见。值为hidden不可触发自身绑定事件。不会产生回流，会产生重绘。
   - display定义元素显示类型，值为none元素不可见，不占据页面空间。父元素none，自身block不可见。值为hidden不可触发自身绑定事件。会产生回流，会产生重绘。
+
+### BFC(Block Formatting Context)
+  - 定义：块级格式化上下文，就是页面上的一个渲染区域，容器内的子元素不会对外面的元素布局产生影响，反之亦然。
+  - 布局规则：
+    * 内部的盒子会在垂直方向，一个接一个地放置
+    * 盒子垂直方向的距离由margin决定，属于同一个BFC的两个相邻Box的上下margin会发生重叠，即以外边距大的为准，不会发生margin穿透问题
+    * 每个元素的左边，与包含的盒子的左边相接触(对于从左往右的格式化，否则相反)，即使存在浮动也是如此
+    * BFC的区域不会与float重叠。float元素固定宽度，BFC元素不设置宽度，BFC元素宽度会自适应
+    * BFC就是页面上的一个隔离的独立容器，容器里面的子元素不会影响到外面的元素，反之也如此
+    * 计算BFC的高度时，浮动元素也参与计算
+  - 触发条件：
+    * 根元素(即html元素)或其它包含它的元素
+    * 浮动float的值不为none，为left,right中任一个
+    * 绝对定位position的值不为relative、static、sticky，为absolute或fixed
+    * 溢出元素overflow的值不为visible，为hidden,auto,scroll中任一个
+    * display的值为table-cell(表格单元格),table-caption(表格标题)和inline-block(行内块)，flex，inline-flex(弹性盒子)中任一个 
+
+### IFC(Inline Formatting Context)
+  - 定义：内联格式化上下文，IFC中盒子依次水平放置，从包含块的顶部开始
+  - 布局规则：
+    * 在一个IFC内，子元素是水平方向横向排列的，并且垂直方向起点为元素顶部
+    * 子元素只会计算横向样式空间(padding、border、margin)，垂直方向样式空间不会被计算
+    * 在垂直方向上，子元素会以不同形式来对齐（vertical-align）
+    * 能把在一行上的框都完全包含进去的一个矩形区域，被称为该行的行框(line box)。行框的宽度是由包含块(containing box)和与其中的浮动来决定
+    * IFC中的​​line box​​一般左右边贴紧其包含块，但float元素会优先排列
+    * IFC中的​​line box​​​高度由CSS行高计算规则来确定，同个​​IFC​​​下的多个​​line box​​高度可能会不同
+    * 当​​inline boxes​​​的总宽度少于包含它们的​​line box​​​时，其水平渲染规则由​​text-align​​属性值来决定
+    * 当一个​​inline box​​​超过父元素的宽度时，它会被分割成多个​​boxes​​​，这些​​boxes​​​分布在多个​​line box​​​中。如果子元素未设置强制换行的情况下，​​inline box​​将不可被分割，将会溢出父元素
+  - 触发条件：
+    * 块级元素中仅包含内联级别元素。形成条件非常简单，需要注意的是当IFC中有块级元素插入时，会产生两个匿名块将父元素分割开来，产生两个IFC
+
+### GFC(GridLayout Formatting Context)
+  - 定义：网格布局格式化上下文，当一个元素设置为display:grid的时候，此元素将获得一个独立的渲染区域，可以在网格容器上定义网格行和列，为每一个网格定义位置和空间。GFC和table的区别在于Grid Layout会有更加丰富的属性来控制行列，控制对齐以及更为精细的渲染
+  - 布局规则：
+    * 通过在​​网格容器(grid container)​​上定义​​网格定义行(grid definition rows)​​​和​​网格定义列(grid definition columns)​​属性各在网格项目(grid item)上定义网格行(grid row)和网格列(grid column)为每一个网格项目(grid item)定义位置和空间
+  - 触发条件：
+    * 当为一个元素设置​​display​​​值为​​grid​​​或者​​inline-grid​​的时候，此元素将会获得一个独立的渲染区域
+
+### FFC(Flex Formatting Context)
+  - 定义：自适应格式化上下文，display值为flex或者inline-flex的元素将会生成自适应容器。flex box由伸缩容器和伸缩子元素组成。通过设置元素display:flex/inline-flex可以得到伸缩容器，前者为块级元素，后者为行内元素。伸缩容器外元素不受影响
+  - 布局规则：
+    * 设置为​​flex​​的容器被渲染为一个块级元素
+    * 设置为​​inline-flex​​的容器被渲染为一个行内元素
+    * 弹性容器中的每一个子元素都是一个弹性项目，弹性项目可以是任意数量的，弹性容器外和弹性项目内的一切元素都不受影响
+  - 触发条件：
+    * 当​​display​​​值为​​flex​​​或​​inline-flex​​时，将生成弹性容器(Flex Container), 一个弹性容器为其内容建立了一个新的弹性格式化上下文环境(FFC) 
+  - 注意：
+    * FFC布局中，float、clear、vertical-align属性不会生效  
