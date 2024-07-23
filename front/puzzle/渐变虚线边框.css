@@ -1,0 +1,9 @@
+/** background-image 图像以z方向堆叠的方式进行，先指定的图像会在之后指定的图像上面绘制 */
+.border-linear {
+  width: 200px;
+  height: 40px;
+  border: 1px dashed #ffffff;
+  background-clip: padding-box, border-box;
+  background-origin: padding-box, border-box;
+  background-image: linear-gradient(#ffffff, #ffffff), linear-gradient(270deg, #FF0000, #00FF00);
+}
