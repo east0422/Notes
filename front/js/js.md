@@ -363,4 +363,65 @@
     * 页面中元素被移除或替换时，若元素绑定的事件仍没被移除，此时需要先手工移除事件，不然会存在内存泄漏。
     * 函数内定义函数，并且内部函数事件回调引用外部变量形成了闭包，闭包可维持函数内局部变量，使其得不到释放。
 
-###
+### 数据类型检测方式
+  - typeof
+    ```
+    console.log(typeof 1); // number
+    conosole.log(typeof '1'); // string
+    console.log(typeof true); // boolean
+    cosole.log(typeof undefined); // undefined
+    console.log(typeof function(){}) // function
+    console.log(typeof null); // object
+    console.log(typeof []); // object
+    cosole.log(typeof {}); // object
+    console.log(typeof new Date()); // object
+    console.log(typeof /\d+/); // object
+    console.log(typeof new Number(1)); // object
+    console.log(typeof NaN); // number
+    ```
+  - instanceof
+    ```
+    // 内部运行机制是判断在其原型链中能否找到该类型的原型。instanceof只能正确判断引用数据类型，而不能判断基本数据类型。instanceof运算符可用来测试一个对象在其原型链中是否存在一个构造函数的prototype属性。
+    console.log(1 instanceof Number); // false
+    console.log('1' instanceof String); // false
+    console.log(true instanceof Boolean); // false
+    console.log(1 instanceof Object); // false
+    console.log(function(){} instanceof Function); // true
+    console.log([] instanceof Array); // true
+    console.log([] instanceof Object); // true
+    console.log({} instanceof Object); // true
+    console.log(new Number(1) instanceof Number); // true
+    console.log(new String('1') instanceof String); // true
+    ```
+  - constructor
+    ```
+    // constructor有两个作用，一是判断数据的类型，二是对象实例通过constrcutor对象访问它的构造函数。需要注意，如果创建一个对象来改变它的原型，constructor就不能用来判断数据类型了。
+    console.log((1).constructor === Number); // true
+    console.log('1'.constructor === String); // true
+    console.log(true.constructor === Boolean); // true
+    console.log(function(){}.constructor === Function); // true
+    console.log([].constructor === Array); // true
+    console.log({}.constructor === Object); // true
+    console.log([].constructor === Object); // false
+    function Fn(){}
+    Fn.prototype = new Array();
+    let fn = new Fn();
+    console.log(fn.constructor === Array); // true
+    console.log(fn.constructor === Object); // false
+    console.log(fn.constructor === Fn); // false
+    ```
+  - Object.prototype.toString.call()
+    ```
+    // Object.prototype.toString.call()使用Object对象的原型方法toString来判断数据类型
+    console.log(Object.prototype.toString.call(1)); // [object Number]
+    console.log(Object.prototype.toString.call('1')); // [object String]
+    console.log(Object.prototype.toString.call(true)); // [object Boolean]
+    console.log(Object.prototype.toString.call(function(){})); //   [object Function]
+    console.log(Object.prototype.toString.call([])); // [object Array]
+    console.log(Object.prototype.toString.call({})); // [object Object]
+    console.log(Object.prototype.toString.call(new Date())); // [object Date]
+    console.log(Object.prototype.toString.call(/\d+/)); // [object RegExp]
+    console.log(Object.prototype.toString.call(new Number(1))); // [object Number]
+    ```
+
+### 
