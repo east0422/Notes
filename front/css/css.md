@@ -1,6 +1,6 @@
 # css
 
-### less->scss->css
+### scss->less->css
 
 ### css
   - css仅仅是一个标记语言，不可以自定义变量，不可以引用
@@ -9,14 +9,34 @@
 
 ### less
   - less是一种动态样式语言，为css增加了变量、嵌套、运算、混入(Mixin)、函数等功能。在现有css语法的基础上为css加入动态语言的特性
-  - 变量定义与使用@开头(@imgUrl: '@/assets/img/';)
+  - 变量定义与使用@开头(@imgUrl: '@/assets/img/';)，使用@{imgUrl}
   - 运算所有操作数被转换成相同的单位(乘法和除法不作转换)，calc并不对数学表达式进行计算，但是在嵌套函数中会计算变量和数学公式的值。可使用转义字符~（width: calc(~'100% + 10px'))
 
-### scss
+### sass/scss
   - scss是一种动态样式语言，比css多出变量、嵌套、运算、混入(Mixin)、继承、颜色处理、函数等功能
-  - 变量定义与使用$开头($imgUrl: '@/assets/img/';)
+  - 变量定义与使用$开头($imgUrl: '@/assets/img/';)，使用#井号插值 #{$imgUrl} 
   - 支持条件语句，可以使用if...else.../for...while...each循环等，less不支持
   - 使用&符号表示父选择器，但是scss的&符号只能出现在一个组合选择器的开始位置，less无此限制
+  - sass不使用花括号和分号使用严格的缩进式风格。sass从第三代开始放弃了缩进式风格，并且完全向下兼容普通的css代码，这一代的sass也被称为scss
+
+### less和sass/scss相同之处
+  - 都可以通过自带的插件，转成相对应的css文件
+  - 都是css的预处理器，可以拥有变量，运算，继承，嵌套的功能，使用两者可以使代码更加的便于阅读和维护。语法上有些共性，比如下面这些：
+    * 混入(Mixins)——class中的class
+    * 参数混入——可以传递参数的class，就像函数一样
+    * 嵌套规则——class中嵌套class，从而减少重复的代码
+    * 运算——CSS中用上数学
+    * 颜色功能——可以编辑颜色
+    * 名字空间(namespace)——分组样式，从而可以被调用
+    * 作用域——局部修改样式
+    * JavaScript赋值——在CSS中使用JavaScript表达式赋值
+
+### less和sass/scss不同之处
+  - 变量符号不同。less是@，scss是$
+  - 输出设置。less没有输出设置，sass提供4种输出选项：nested(嵌套缩进的css代码)，compact(简洁格式的css代码)，compressed(压缩后的css代码)和expanded(展开的多行css代码)
+  - sass支持条件语句，可使用if{} else{}，for{}循环等。less不支持
+  - 引用外部css文件。less引用外部文件和css中的@import没什么差别。scss引用的外部文件名若是下划线_开头的话，sass会认为该文件是一个引用文件不会将其编译为css文件
+  - less和scss都可以使用&符号表示父选择器，但是scss的&符号只能出现在一个组合选择器的开始位置(css1&:hover编译不通过只能&:hover)，less则没有这个限制(可使用css1&:hover)
 
 ### 伪元素巧用
   - 顶部或底部下划线
