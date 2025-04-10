@@ -1,9 +1,9 @@
 #!/bin/sh
  
 # 旧仓库地址前缀
-export old_repo_url_prefix="https://e.coding.net/topeak/digital-village-2.0"
+export old_repo_url_prefix="https://e.coding.net/xxx"
 # 新仓库地址前缀
-export new_repo_url_prefix="https://gitee.com/HuBeiTopeak_1"
+export new_repo_url_prefix="https://gitee.com/yyy"
 
 # -e 选项允许echo解释字符串中的转义序列。\033是转义字符的八进制表示，[开始控制序列，31m, 32m, 33m, 44m等是指定颜色的代码，0m结束颜色设置。
 # 31m 是红色 32m是绿色 33m是黄色 44m是蓝色背景 37m是白色文本，当有背景颜色时使用。
@@ -29,3 +29,6 @@ ls -l -d */ | awk '{print $9}' | xargs -I % bash -c '
       fi
     fi;
   fi;'
+
+# newOriginUrl="https://gitee.com/xxx/xxx.git"
+# echo  $(git ls-remote --exit-code $newOriginUrl > /dev/null 2>&1)
