@@ -1,9 +1,9 @@
 #!/bin/bash
 
 # 配置参数
-ENTERPRISE_NAME="enterprises_name"  # 企业名称
+ENTERPRISE_NAME="enterprice_name"  # 企业名称
 ACCESS_TOKEN="access_token"        # 个人访问令牌
-BACKUP_ORG_NAME="back_org_name" # 备份组织名称
+BACKUP_ORG_NAME="backup_org_name" # 备份组织名称
 BACKUP_PREFIX="https://gitee.com/${BACKUP_ORG_NAME}" # 备份仓库的前缀
 BACKUP_DIR="E:/backup/tmp"     # 备份目录路径
 REPOS_FILE="${BACKUP_DIR}/repos.json"  # 仓库列表信息输出文件名
@@ -22,7 +22,7 @@ WHITE='\033[0;37m'
 NC='\033[0m'
 # -e 选项允许echo解释字符串中的转义序列。\033是转义字符的八进制表示，[开始控制序列，31m, 32m, 33m, 44m等是指定颜色的代码，0m结束颜色设置。
 echo -e "${GREEN}绿色-表示成功备份到远程仓库${NC}"
-echo -e "${YELLOW}黄色-表示当前远程仓库和备份远程仓库地址相同，无需备份${NC}"
+echo -e "${YELLOW}黄色-表示当前远程仓库和备份远程仓库地址相同或两者仓库最新提交commit一致，无需备份${NC}"
 echo -e "${RED}红色-备份失败${NC}"
 
 # 日志文件路径
@@ -60,12 +60,11 @@ call_api() {
   local content=$(echo "$response" | head -n -1)
   
   # echo返回数据，return返回状态码(0成功，1失败)
-  if [ "$http_code" -eq 200 ] || [ "$http_code" -eq 201 ]; then
+  if [[ "$http_code" =~ ^(200|201)$ ]]; then
     echo "$content"
     return 0
   else
     logError "API请求失败: $url (HTTP $http_code)"
-    echo "$content"
     return 1
   fi
 }
@@ -132,6 +131,33 @@ create_backup_repo() {
   fi
 }
 
+# 获取最新提交commit
+get_latest_commits() {
+  local owner=$1
+  local repo_name=$2
+
+  local branch_api_url="https://gitee.com/api/v5/repos/${owner}/${repo_name}/branches"
+  local branches=$(call_api "$branch_api_url")
+  
+  # 检查是否获取到分支列表
+  if [ $? -ne 0 ] || [ -z "$branches" ] || [ "$branches" = "null" ] || $(! echo "$branches" | jq empty >/dev/null 2>&1;); then
+    logError "获取分支列表失败，请检查${branch_api_url}是否正确！"
+    echo "获取分支列表失败，请检查${branch_api_url}是否正确！"
+    return 1
+  fi
+
+  # local latestCommitInfo=$(echo "$branches" | jq 'max_by(.commit.commit.author.date) | {branchName: .name, commitId: .commit.sha, commitDate: .commit.commit.author.date}')
+  local latestCommitId=$(echo "$branches" | jq 'max_by(.commit.commit.author.date) | .commit.sha')
+  if [ -z "$latestCommitId" ]; then
+    logError "没有找到最新提交！"
+    echo "没有找到最新提交！"
+    return 1
+  else
+    echo "$latestCommitId"
+    return 0
+  fi
+}
+
 # 备份所有仓库（克隆和推送）
 backup_repos() {
   log "开始备份仓库..."
@@ -155,10 +181,19 @@ backup_repos() {
         continue
       fi
     fi
+    
+    # 检查备份仓库是否已是最新版本
+    local enterprisesLatestCommitId=$(get_latest_commits $ENTERPRISE_NAME $repo_name)
+    local backupLatestCommitId=$(get_latest_commits $BACKUP_ORG_NAME $repo_name)
+    if [ "$enterprisesLatestCommitId" = "$backupLatestCommitId" ]; then
+      logWarning "备份仓库已是最新版本"
+      continue
+    fi
 
     log "正在克隆 ${http_url}..."
     
-    if git clone --mirror "$http_url" "$repo_dir" &>> "$LOG_FILE"; then
+    git clone --mirror "$http_url" "$repo_dir" &>> "$LOG_FILE"
+    if [ $? -eq 0 ]; then
       log "成功克隆 ${http_url}"
     else
       logError "克隆失败 ${http_url}"
@@ -169,7 +204,8 @@ backup_repos() {
     local backup_repo_url="${BACKUP_PREFIX}/${repo_name}.git"
     log "开始备份仓库 ${backup_repo_url}"
     cd "$repo_dir" || continue
-    if git push --mirror "$backup_repo_url" &>> "$LOG_FILE"; then
+    git push --mirror "$backup_repo_url" &>> "$LOG_FILE"
+    if [ $? -eq 0 ]; then
       logSuccess "备份成功 ${backup_repo_url}"
     else
       logError "备份失败 ${backup_repo_url}"
@@ -202,4 +238,3 @@ main() {
 # else
 #   echo "不存在该仓库"
 # fi
-
